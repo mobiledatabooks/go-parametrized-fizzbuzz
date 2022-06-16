@@ -25,7 +25,7 @@ pkg/fizzbuzz/tst.bash
 .vscode/
 .vscode
 key.json
-
+observed.txt
 go-parametrized-fizzbuzz
 main
 .DS_Store
