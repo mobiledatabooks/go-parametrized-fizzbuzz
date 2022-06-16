@@ -30,10 +30,10 @@ import (
 // FizzBuzz
 // 16
 
-// FizzBuzz01 generates the expected array in an alternative way (very inefficient).
+// FizzBuzzSlow generates the expected array in an alternative way (very inefficient).
 //
 // tag::fizz-buzz-01[]
-func FizzBuzz01(fizzAti, buzzAti int64) []string {
+func FizzBuzzSlow(fizzAti, buzzAti int64) []string {
 	var total int64 = 4 * fizzAti * buzzAti // <1>
 	if buzzAti < fizzAti {                  // <2>
 		t := buzzAti
@@ -81,10 +81,10 @@ func FizzBuzz01(fizzAti, buzzAti int64) []string {
 
 // end::fizz-buzz-01[]
 
-// FizzBuzz01A generates the expected array in an alternative way (very inefficient).
+// FizzBuzzSlowMinMemory generates the expected array in an alternative way (very inefficient).
 //
 // tag::fizz-buzz-01-a[]
-func FizzBuzz01A(fizzAti, buzzAti int64) []string {
+func FizzBuzzSlowMinMemory(fizzAti, buzzAti int64) []string {
 	var total int64 = 4 * fizzAti * buzzAti // <1>
 	if buzzAti < fizzAti {                  // <2>
 		t := buzzAti
@@ -133,9 +133,9 @@ func FizzBuzz01A(fizzAti, buzzAti int64) []string {
 
 // end::fizz-buzz-01-a[]
 
-// FizzBuzz02 performs a FizzBuzz operation over a range of integers
+// FizzBuzzIfElse performs a FizzBuzz operation over a range of integers
 // tag::fizz-buzz-02[]
-func FizzBuzz02(fizzAt, buzzAt int64) []string {
+func FizzBuzzIfElse(fizzAt, buzzAt int64) []string {
 	var total int64 = 4 * fizzAt * buzzAt // <1>
 	if buzzAt < fizzAt {                  // <2>
 		t := buzzAt
@@ -167,9 +167,9 @@ func FizzBuzz02(fizzAt, buzzAt int64) []string {
 
 // end::fizz-buzz-02[]
 
-// FizzBuzz03 performs a FizzBuzz operation over a range of integers
+// FizzBuzzContinue performs a FizzBuzz operation over a range of integers
 // tag::fizz-buzz-03[]
-func FizzBuzz03(fizzAt, buzzAt int64) []string {
+func FizzBuzzContinue(fizzAt, buzzAt int64) []string {
 	var total int64 = 4 * fizzAt * buzzAt // <1>
 	if buzzAt < fizzAt {                  // <2>
 		t := buzzAt
@@ -205,10 +205,10 @@ func FizzBuzz03(fizzAt, buzzAt int64) []string {
 
 // end::fizz-buzz-03[]
 
-// FizzBuzz04 performs a FizzBuzz operation over a range of integers
+// FizzBuzzBigInt performs a FizzBuzz operation over a range of integers
 
 // tag::fizz-buzz-04[]
-func FizzBuzz04(fizzAt, buzzAt int64) []string {
+func FizzBuzzBigInt(fizzAt, buzzAt int64) []string {
 	var total int64 = 4 * fizzAt * buzzAt // <1>
 	if buzzAt < fizzAt {                  // <2>
 		t := buzzAt
@@ -284,9 +284,9 @@ const Buzz = "Y" // "Y"
 // const FizzBuzz = "Z" //"Z"
 const Digit = "O"
 
-// FizzBuzzA performs a FizzBuzz operation over a range of integers
+// FizzBuzzMinMemory performs a FizzBuzz operation over a range of integers
 // tag::fizz-buzz-a[]
-func FizzBuzzA(fizzAt, buzzAt int64) []string {
+func FizzBuzzMinMemory(fizzAt, buzzAt int64) []string {
 	var total int64 = 4 * fizzAt * buzzAt // <1>
 	if buzzAt < fizzAt {                  // <2>
 		t := buzzAt
@@ -320,3 +320,59 @@ func FizzBuzzA(fizzAt, buzzAt int64) []string {
 }
 
 // end::fizz-buzz-a[]
+const empty = "" //"x"
+// FizzBuzzConcurrent  Concurrent FizzBuzz with Go Routines from Russ Cox. Here you find a parametrized solution.
+//
+// .FizzBuzzConcurrent
+// tag::fizz-buzz-FizzBuzzConcurrent[]
+func FizzBuzzConcurrent(fizzAt, buzzAt int64) []string { // <1>
+	if buzzAt < fizzAt {
+		t := buzzAt
+		buzzAt = fizzAt
+		fizzAt = t
+	}
+	c := generate() // <2>
+	// <3>
+	c = filter(c, int(fizzAt), "Fizz")    // <6>
+	c = filter(c, int(buzzAt), "Buzz")    // <6>
+	var total int64 = 4 * fizzAt * buzzAt //
+	result := make([]string, total)       // <5>
+
+	for i := int64(1); i <= total; i++ { // <7>
+		if s := <-c; s != empty {
+			result[i-1] = s
+
+		} else {
+			result[i-1] = strconv.FormatInt(i, 10) //
+		}
+	}
+	return result // <4>
+}
+
+func generate() <-chan string { // <8>
+	c := make(chan string)
+	go func() { // <9>
+		for { //i0 := 1; ; i0++ {
+			c <- empty //+ " " + strconv.Itoa(i0) + " "
+		}
+	}()
+	return c
+}
+
+// <10>
+func filter(c <-chan string, n int, label string) <-chan string { // <3>
+	out := make(chan string)
+	go func() { // <12>
+		for { //
+
+			var i int
+			for i = 1; i < n; i++ { // <13>
+				out <- <-c
+			}
+			out <- <-c + label // <14>
+		}
+	}()
+	return out // <11>
+}
+
+// end::fizz-buzz-FizzBuzzConcurrent[]
